@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Download, Printer, CalendarPlus } from 'lucide-react';
 import type { TaperSchedule } from '@/lib/types';
 import { generateICS } from '@/lib/taper-engine';
@@ -13,56 +13,81 @@ interface PdfExportProps {
 export default function PdfExport({ targetId, schedule }: PdfExportProps) {
   const [generating, setGenerating] = useState(false);
 
-  async function handleExportPdf() {
+  const handleExportPdf = useCallback(async () => {
     setGenerating(true);
     try {
       const element = document.getElementById(targetId);
       if (!element) return;
 
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
+      // Clone the handout into a hidden iframe for clean PDF rendering
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '0';
+      iframe.style.width = '800px';
+      iframe.style.height = '100vh';
+      document.body.appendChild(iframe);
 
-      // Add padding wrapper for PDF
-      element.style.padding = '24px';
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) return;
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: element.scrollWidth,
-        windowWidth: 800, // force desktop-like rendering
-      });
-
-      element.style.padding = '';
-
-      const imgWidth = 190; // A4 with margins
-      const pageHeight = 277; // A4 with margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-
-      let heightLeft = imgHeight;
-      let position = 10; // top margin
-
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Copy all stylesheets
+      const stylesheets = Array.from(document.styleSheets);
+      let cssText = '';
+      for (const sheet of stylesheets) {
+        try {
+          const rules = Array.from(sheet.cssRules);
+          cssText += rules.map(r => r.cssText).join('\n');
+        } catch {
+          // Cross-origin sheets — fetch via link
+          if (sheet.href) {
+            cssText += `@import url("${sheet.href}");\n`;
+          }
+        }
       }
 
-      const filename = schedule.patientName
-        ? `dex-taper-${schedule.patientName.replace(/\s+/g, '-').toLowerCase()}.pdf`
-        : 'dex-taper-instructions.pdf';
-      pdf.save(filename);
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            ${cssText}
+            @media print {
+              body { margin: 0; padding: 24px; }
+            }
+            body {
+              margin: 0;
+              padding: 24px;
+              background: white;
+              font-family: system-ui, -apple-system, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            /* Force colors for print */
+            * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          </style>
+        </head>
+        <body>${element.innerHTML}</body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      // Wait for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      iframe.contentWindow?.print();
+
+      // Clean up after print dialog closes
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
     } catch (err) {
       console.error('PDF generation failed:', err);
     } finally {
       setGenerating(false);
     }
-  }
+  }, [targetId]);
 
   function handleExportCalendar() {
     const ics = generateICS(schedule);
