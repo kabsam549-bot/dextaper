@@ -35,7 +35,9 @@ function buildInstruction(dose: number, frequency: Frequency): string {
 }
 
 export function generateSchedule(schedule: TaperSchedule): DailyDose[] {
-  const startDate = new Date(schedule.startDate);
+  // Parse as local date to avoid timezone offset issues
+  const [year, month, day] = schedule.startDate.split('-').map(Number);
+  const startDate = new Date(year, month - 1, day);
   const dailyDoses: DailyDose[] = [];
   let currentDay = 0;
 

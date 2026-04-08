@@ -43,7 +43,7 @@ const PatientHandout = forwardRef<HTMLDivElement, PatientHandoutProps>(
             {schedule.patientName && (
               <span><strong>Patient:</strong> {schedule.patientName}</span>
             )}
-            <span><strong>Start Date:</strong> {format(new Date(schedule.startDate), 'MMMM d, yyyy')}</span>
+            <span><strong>Start Date:</strong> {(() => { const [y,m,d] = schedule.startDate.split('-').map(Number); return format(new Date(y, m-1, d), 'MMMM d, yyyy'); })()}</span>
             <span><strong>Indication:</strong> {schedule.indication}</span>
           </div>
           {(schedule.providerName || schedule.providerPhone) && (
