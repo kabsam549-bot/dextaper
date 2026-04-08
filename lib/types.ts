@@ -1,4 +1,5 @@
 export type Frequency = 'QID' | 'TID' | 'BID' | 'daily' | 'QOD';
+export type PillSize = 0.5 | 1 | 1.5 | 2 | 4;
 
 export interface TaperStep {
   dose: number;       // mg per dose
@@ -12,18 +13,22 @@ export interface TaperSchedule {
   indication: string;
   providerName: string;
   providerPhone: string;
+  pillSize: PillSize;
   steps: TaperStep[];
 }
 
 export interface DoseTime {
-  time: string;  // e.g., "Morning", "Noon", "Evening", "Bedtime"
+  time: 'Morning' | 'Noon' | 'Evening' | 'Bedtime';
   mg: number;
+  pills: number;
+  pillLabel: string;  // e.g., "2 tablets" or "1 tablet"
 }
 
 export interface DailyDose {
   date: Date;
   dayNumber: number;
   totalDailyMg: number;
+  totalPills: number;
   instructions: string;
   doses: DoseTime[];
 }
