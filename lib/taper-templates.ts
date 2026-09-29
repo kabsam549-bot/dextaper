@@ -3,15 +3,15 @@ import type { TaperTemplate } from './types';
 export const templates: TaperTemplate[] = [
   {
     id: 'brain-mets-standard',
-    name: 'Brain Mets - Standard',
-    description: '16 mg/day start, 2-week taper',
+    name: 'Symptom-guided discharge taper',
+    description: '16 → 12 → 8 → 4 → 2 mg/day, 3–4 days per step',
     indication: 'Brain metastases',
     steps: [
-      { dose: 4, frequency: 'QID', days: 3 },
-      { dose: 4, frequency: 'BID', days: 3 },
-      { dose: 2, frequency: 'BID', days: 3 },
-      { dose: 2, frequency: 'daily', days: 3 },
-      { dose: 1, frequency: 'daily', days: 3 },
+      { dose: 8, frequency: 'BID', days: 4 },
+      { dose: 6, frequency: 'BID', days: 4 },
+      { dose: 4, frequency: 'BID', days: 4 },
+      { dose: 2, frequency: 'BID', days: 4 },
+      { dose: 2, frequency: 'daily', days: 4 },
     ],
   },
   {

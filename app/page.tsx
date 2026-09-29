@@ -6,6 +6,7 @@ import type { TaperSchedule } from '@/lib/types';
 import TaperBuilder from '@/components/taper-builder';
 import PatientHandout from '@/components/patient-handout';
 import PdfExport from '@/components/pdf-export';
+import ClinicianNote from '@/components/clinician-note';
 
 export default function Home() {
   const [schedule, setSchedule] = useState<TaperSchedule | null>(null);
@@ -71,6 +72,7 @@ export default function Home() {
             <div className="rounded-xl bg-white shadow-sm border border-gray-200 p-4 sm:p-8 print:shadow-none print:border-none print:p-0">
               <PatientHandout ref={handoutRef} schedule={schedule} />
             </div>
+            <ClinicianNote schedule={schedule} />
           </section>
         )}
       </div>

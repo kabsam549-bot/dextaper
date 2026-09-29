@@ -5,7 +5,12 @@ import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import type { TaperSchedule, TaperStep, Frequency, PillSize } from '@/lib/types';
 import { templates, indications, frequencies } from '@/lib/taper-templates';
 import { getTotalDays } from '@/lib/taper-engine';
-import { format } from 'date-fns';
+
+function todayIsoDate() {
+  const now = new Date();
+  const timezoneOffset = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - timezoneOffset).toISOString().slice(0, 10);
+}
 
 interface TaperBuilderProps {
   onGenerate: (schedule: TaperSchedule) => void;
@@ -21,7 +26,7 @@ const pillSizes: { value: PillSize; label: string }[] = [
 
 export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
   const [patientName, setPatientName] = useState('');
-  const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [startDate, setStartDate] = useState(todayIsoDate());
   const [indication, setIndication] = useState(indications[0]);
   const [providerName, setProviderName] = useState('');
   const [providerPhone, setProviderPhone] = useState('');
