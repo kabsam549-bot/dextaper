@@ -24,6 +24,47 @@ const pillSizes: { value: PillSize; label: string }[] = [
   { value: 4, label: '4 mg' },
 ];
 
+type TaperPace = 'gentle' | 'rapid';
+
+const startingDoseOptions = [4, 8, 12, 16];
+
+function doseLevels(startingDose: number, pace: TaperPace): number[] {
+  const gentleLevels: Record<number, number[]> = {
+    4: [4, 2],
+    8: [8, 6, 4, 2],
+    12: [12, 8, 6, 4, 2],
+    16: [16, 12, 8, 6, 4, 2],
+  };
+  const rapidLevels: Record<number, number[]> = {
+    4: [4, 2],
+    8: [8, 4, 2],
+    12: [12, 6, 2],
+    16: [16, 8, 4, 2],
+  };
+  return (pace === 'gentle' ? gentleLevels : rapidLevels)[startingDose];
+}
+
+function keepEndpoints(levels: number[], maximumSteps: number): number[] {
+  if (maximumSteps >= levels.length) return levels;
+  if (maximumSteps <= 1) return [levels[0]];
+
+  return Array.from({ length: maximumSteps }, (_, index) => (
+    levels[Math.round((index * (levels.length - 1)) / (maximumSteps - 1))]
+  ));
+}
+
+function taperSteps(startingDose: number, totalDays: number, pace: TaperPace): TaperStep[] {
+  const levels = keepEndpoints(doseLevels(startingDose, pace), totalDays);
+  const baseDays = Math.floor(totalDays / levels.length);
+  const remainingDays = totalDays % levels.length;
+
+  return levels.map((dailyMg, index) => ({
+    dose: dailyMg <= 2 ? dailyMg : dailyMg / 2,
+    frequency: dailyMg <= 2 ? 'daily' : 'BID',
+    days: baseDays + (index < remainingDays ? 1 : 0),
+  }));
+}
+
 export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
   const [patientName, setPatientName] = useState('');
   const [startDate, setStartDate] = useState(todayIsoDate());
@@ -33,6 +74,8 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
   const [pillSize, setPillSize] = useState<PillSize>(2);
   const [steps, setSteps] = useState<TaperStep[]>(templates[0].steps);
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0].id);
+  const [startingDose, setStartingDose] = useState(8);
+  const [requestedDays, setRequestedDays] = useState(10);
 
   function handleTemplateChange(templateId: string) {
     setSelectedTemplate(templateId);
@@ -62,6 +105,12 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
 
   function removeStep(index: number) {
     setSteps(steps.filter((_, i) => i !== index));
+    setSelectedTemplate('custom');
+  }
+
+  function applyTaperBuilder(pace: TaperPace) {
+    const totalDays = Math.max(1, Math.round(requestedDays) || 1);
+    setSteps(taperSteps(startingDose, totalDays, pace));
     setSelectedTemplate('custom');
   }
 
@@ -102,6 +151,45 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         </div>
+      </div>
+
+      {/* Quick Taper Builder */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+        <div>
+          <h2 className="text-sm font-semibold text-blue-950">Quick taper builder</h2>
+          <p className="mt-0.5 text-xs text-blue-800">Choose a starting daily dose and total duration, then apply an editable starting schedule.</p>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="block text-sm font-medium text-blue-950">
+            Starting dose (mg/day)
+            <select
+              value={startingDose}
+              onChange={e => setStartingDose(Number(e.target.value))}
+              className="mt-1 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+            >
+              {startingDoseOptions.map(dose => <option key={dose} value={dose}>{dose} mg/day</option>)}
+            </select>
+          </label>
+          <label className="block text-sm font-medium text-blue-950">
+            Total taper days
+            <input
+              type="number"
+              min="1"
+              value={requestedDays}
+              onChange={e => setRequestedDays(Number(e.target.value))}
+              className="mt-1 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+            />
+          </label>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <button type="button" onClick={() => applyTaperBuilder('gentle')} className="rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+            Apply gentle taper
+          </button>
+          <button type="button" onClick={() => applyTaperBuilder('rapid')} className="rounded-lg border border-blue-300 bg-white px-3 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">
+            Apply rapid taper
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-blue-800">The generated steps are a starting point and remain fully editable. Individualize to the patient.</p>
       </div>
 
       {/* Patient + Date */}
