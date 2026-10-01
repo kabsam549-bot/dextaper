@@ -8,11 +8,8 @@ export interface TaperStep {
 }
 
 export interface TaperSchedule {
-  patientName: string;
   startDate: string;  // ISO date string
   indication: string;
-  providerName: string;
-  providerPhone: string;
   pillSize: PillSize;
   steps: TaperStep[];
 }

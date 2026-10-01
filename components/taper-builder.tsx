@@ -66,11 +66,8 @@ function taperSteps(startingDose: number, totalDays: number, pace: TaperPace): T
 }
 
 export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
-  const [patientName, setPatientName] = useState('');
   const [startDate, setStartDate] = useState(todayIsoDate());
   const [indication, setIndication] = useState(indications[0]);
-  const [providerName, setProviderName] = useState('');
-  const [providerPhone, setProviderPhone] = useState('');
   const [pillSize, setPillSize] = useState<PillSize>(2);
   const [steps, setSteps] = useState<TaperStep[]>(templates[0].steps);
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0].id);
@@ -117,11 +114,8 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     onGenerate({
-      patientName,
       startDate,
       indication,
-      providerName,
-      providerPhone,
       pillSize,
       steps,
     });
@@ -192,29 +186,15 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
         <p className="mt-2 text-xs text-blue-800">The generated steps are a starting point and remain fully editable. Individualize to the patient.</p>
       </div>
 
-      {/* Patient + Date */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Patient Name <span className="text-gray-400">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={patientName}
-            onChange={e => setPatientName(e.target.value)}
-            placeholder="Patient name"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Start Date</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={e => setStartDate(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-          />
-        </div>
+      {/* Start Date */}
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">Start Date</label>
+        <input
+          type="date"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+        />
       </div>
 
       {/* Indication + Pill Size */}
@@ -254,29 +234,6 @@ export default function TaperBuilder({ onGenerate }: TaperBuilderProps) {
         </div>
       </div>
 
-      {/* Provider Info */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Provider Name</label>
-          <input
-            type="text"
-            value={providerName}
-            onChange={e => setProviderName(e.target.value)}
-            placeholder="Dr. Smith"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Contact Phone</label>
-          <input
-            type="tel"
-            value={providerPhone}
-            onChange={e => setProviderPhone(e.target.value)}
-            placeholder="(713) 555-1234"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-          />
-        </div>
-      </div>
 
       {/* Taper Steps */}
       <div>

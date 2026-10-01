@@ -131,7 +131,7 @@ export function generateICS(schedule: TaperSchedule): string {
     'PRODID:-//DexTaper//Dexamethasone Taper//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:Dexamethasone Taper${schedule.patientName ? ` - ${schedule.patientName}` : ''}`,
+    'X-WR-CALNAME:Dexamethasone Taper',
   ];
 
   for (const day of dailyDoses) {

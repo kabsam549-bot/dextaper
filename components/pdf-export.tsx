@@ -95,9 +95,7 @@ export default function PdfExport({ targetId, schedule }: PdfExportProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = schedule.patientName
-      ? `dex-taper-${schedule.patientName.replace(/\s+/g, '-').toLowerCase()}.ics`
-      : 'dex-taper.ics';
+    a.download = 'dex-taper.ics';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

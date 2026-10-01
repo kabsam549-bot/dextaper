@@ -91,18 +91,9 @@ const PatientHandout = forwardRef<HTMLDivElement, PatientHandoutProps>(
             Pill strength: {schedule.pillSize} mg tablets
           </p>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-            {schedule.patientName && (
-              <span><strong>Patient:</strong> {schedule.patientName}</span>
-            )}
             <span><strong>Start:</strong> {(() => { const [y,m,d] = schedule.startDate.split('-').map(Number); return format(new Date(y, m-1, d), 'MMMM d, yyyy'); })()}</span>
             <span><strong>Indication:</strong> {schedule.indication}</span>
           </div>
-          {(schedule.providerName || schedule.providerPhone) && (
-            <div className="mt-1 text-sm text-gray-600">
-              {schedule.providerName && <span><strong>Provider:</strong> {schedule.providerName}</span>}
-              {schedule.providerPhone && <span className="ml-4"><strong>Phone:</strong> {schedule.providerPhone}</span>}
-            </div>
-          )}
         </div>
 
         {/* Daily Schedule */}
@@ -203,11 +194,7 @@ const PatientHandout = forwardRef<HTMLDivElement, PatientHandoutProps>(
             <li>Severe mood changes or confusion</li>
             <li>New or worsening seizures</li>
           </ul>
-          {schedule.providerPhone && (
-            <p className="mt-2 text-sm font-semibold text-red-900">
-              Contact: {schedule.providerName ? `${schedule.providerName} — ` : ''}{schedule.providerPhone}
-            </p>
-          )}
+
           <p className="mt-1 text-[13px] text-red-800">
             For emergencies, call 911 or go to the nearest emergency room.
           </p>
